@@ -1,4 +1,4 @@
-- hosts: "{{ variable_host | default('web') }}"
+- hosts: "{{ variable_host }}"
   #Uncomment if ssh root not allowed
   #become: yes
   #become_method: sudo
@@ -12,6 +12,7 @@
     authorized_keys_file_path: ./files/authorized_keys
 
   vars_files:
+    - main.yml
     - vars/security.yml
 
   pre_tasks:
@@ -37,7 +38,7 @@
       service: name=firewalld state=started enabled=yes
     - name: Reboot
       reboot:
-        reboot_timeout: 30
+        reboot_timeout: 60
 
   tasks:
     - name: Create www user
