@@ -1,0 +1,82 @@
+- hosts: "{{ variable_host | default('web') }}"
+  #Uncomment if ssh root not allowed
+  #become: yes
+  #become_method: sudo
+
+  vars:
+    swap_file_size_mb: '2048'
+    pip_package: python3-pip
+    pip_executable: pip3
+    pip_install_packages:
+      - name: docker
+    authorized_keys_file_path: ./files/authorized_keys
+
+  vars_files:
+    - vars/security.yml
+
+  pre_tasks:
+    - name: Install yum epel-release
+      yum:
+        name: ['epel-release']
+    - name: Install yum package
+      yum:
+        name: ['python3-libselinux', 'curl', 'wget', 'git', 'vim', 'python3-policycoreutils', 'p7zip', 'firewalld', 'tmux']
+    - name: Disable SElinux
+      selinux:
+        state: disabled
+    - name: set timezone to Europe/Moscow
+      timezone:
+        name: Europe/Moscow
+    - name: Open custom SSH port
+      firewalld:
+        port: 1822/tcp
+        permanent: yes
+        zone: public
+        state: enabled
+    - name: Enable firewalld
+      service: name=firewalld state=started enabled=yes
+    - name: Reboot
+      reboot:
+        reboot_timeout: 30
+
+  tasks:
+    - name: Create www user
+      user:
+        name: www
+        generate_ssh_key: yes
+        ssh_key_bits: 2048
+        ssh_key_file: .ssh/id_rsa
+        shell: /bin/bash
+        uid: 1050
+        home: /srv/www
+        groups: docker
+
+    - stat: path={{ authorized_keys_file_path }}
+      register: authorized_keys_file
+
+    - name: Copy authorized_keys for www
+      copy:
+        src: '{{ authorized_keys_file_path }}'
+        dest: /srv/www/.ssh/authorized_keys
+        owner: www
+        group: www
+        mode: 0600
+      when: authorized_keys_file.stat.exists
+
+    - git:
+        repo: https://github.com/rhamdeew/docker-compose-php.git
+        dest: /srv/www/docker-compose-php
+      become_user: www
+
+    - file:
+        path: /srv/www
+        owner: www
+        group: www
+        recurse: yes
+
+  roles:
+    - geerlingguy.swap
+    - geerlingguy.repo-epel
+    - geerlingguy.security
+    - geerlingguy.pip
+    - geerlingguy.docker
