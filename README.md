@@ -9,3 +9,15 @@ CentOS 8
 - install docker & docker-compose
 - create user www, add auth keys, group docker
 - clone docker-compose php
+
+# How to Install
+
+```
+cp main.yml.example main.yml
+```
+
+edit main.yml
+
+```
+make s
+```
