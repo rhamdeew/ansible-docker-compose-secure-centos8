@@ -29,50 +29,49 @@
       timezone:
         name: Europe/Moscow
     - name: Open custom SSH port
-      firewalld:
-        port: 1822/tcp
+      ansible.posix.firewalld:
+        port: '{{ security_ssh_port }}/tcp'
         permanent: yes
         zone: public
         state: enabled
-    - name: Enable firewalld
-      service: name=firewalld state=started enabled=yes
     - name: Reboot
       reboot:
-        reboot_timeout: 60
+        reboot_timeout: '60'
 
   tasks:
-    - name: Create www user
+    - name: Create {{ username }} user
       user:
-        name: www
+        name: '{{ username }}'
         generate_ssh_key: yes
         ssh_key_bits: 2048
         ssh_key_file: .ssh/id_rsa
         shell: /bin/bash
-        uid: 1050
-        home: /srv/www
+        uid: '{{ uid }}'
+        home: /srv/{{ username }}
         groups: docker
 
-    - stat: path={{ authorized_keys_file_path }}
+    - name: Check file {{ authorized_keys_file_path }} exists
+      local_action: stat path={{ authorized_keys_file_path }}
       register: authorized_keys_file
 
-    - name: Copy authorized_keys for www
+    - name: Copy authorized_keys for {{ username }}
       copy:
         src: '{{ authorized_keys_file_path }}'
-        dest: /srv/www/.ssh/authorized_keys
-        owner: www
-        group: www
+        dest: /srv/{{ username }}/.ssh/authorized_keys
+        owner: '{{ username }}'
+        group: '{{ username }}'
         mode: 0600
       when: authorized_keys_file.stat.exists
 
     - git:
         repo: https://github.com/rhamdeew/docker-compose-php.git
-        dest: /srv/www/docker-compose-php
-      become_user: www
+        dest: /srv/{{ username }}/docker-compose-php
+      become_user: '{{ username }}'
 
     - file:
-        path: /srv/www
-        owner: www
-        group: www
+        path: /srv/{{ username }}
+        owner: '{{ username }}'
+        group: '{{ username }}'
         recurse: yes
 
   roles:

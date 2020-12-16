@@ -13,11 +13,21 @@ CentOS 8
 # How to Install
 
 ```
-cp main.yml.example main.yml
+make i
 ```
+
+---------
 
 edit main.yml
 
+---------
+
 ```
 make s
+```
+
+or without strict host checking
+
+```
+make ns
 ```
