@@ -2,7 +2,7 @@ CentOS 8
 
 - 2Gb swap
 - fail2ban
-- ssh on port 1822
+- ssh on custom port
 - firewall
 - disable selinux
 - python3
