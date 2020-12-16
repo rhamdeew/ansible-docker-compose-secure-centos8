@@ -21,7 +21,7 @@
         name: ['epel-release']
     - name: Install yum package
       yum:
-        name: ['python3-libselinux', 'curl', 'wget', 'git', 'vim', 'python3-policycoreutils', 'p7zip', 'firewalld', 'tmux']
+        name: ['python3-libselinux', 'curl', 'wget', 'git', 'vim', 'python3-policycoreutils', 'p7zip', 'firewalld', 'tmux', 'make']
     - name: Disable SElinux
       selinux:
         state: disabled
