@@ -53,6 +53,8 @@
     - name: Check file {{ authorized_keys_file_path }} exists
       local_action: stat path={{ authorized_keys_file_path }}
       register: authorized_keys_file
+      #Uncomment if ssh root not allowed
+      #become: no
 
     - name: Copy authorized_keys for {{ username }}
       copy:
